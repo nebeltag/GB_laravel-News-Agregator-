@@ -41,6 +41,30 @@
                             </div>
                         </div>
 
+                        @foreach(App\Http\Controllers\Providers::getProviders() as $item => $provider)
+
+                            <div style="margin-bottom: 15px">
+                                <a href="{{ route('social-providers.redirect', $provider['provider']) }}" style="text-decoration: none;">
+                                    <img src={{ asset($provider['image']) }} width="50" alt={{ $provider['provider'] }}>
+                                </a>
+                                <span style="margin-left: 30px">Войти через {{ $provider['text'] }}.</span>
+                            </div>
+
+                        @endforeach
+
+                        {{--<div style="margin-bottom: 15px">
+                            <a href="{{ route('social-providers.redirect', 'vkontakte') }}" style="text-decoration: none;">
+                                <img src="{{ asset('assets/images/vk.png') }}" width="50" alt="Vkontakte">
+                            </a>
+                            <span style="margin-left: 30px">Войти через "Вконтакте".</span>
+                        </div>
+
+                        <div style="margin-bottom: 15px">
+                            <a href="{{ route('social-providers.redirect', 'github') }}" style="text-decoration: none;">
+                                <img src="{{ asset('assets/images/github.png') }}" width="50" alt="Github">
+                            </a>
+                            <span style="margin-left: 30px">Войти через "Github".</span>
+                        </div>--}}
                         <div class="row mb-3">
                             <div class="col-md-6 offset-md-4">
                                 <div class="form-check">
