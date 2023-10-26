@@ -76,7 +76,9 @@
             @endforelse
             </tbody>
         </table>
-        {{ $news->links() }}
+        <div style="padding-right: 65px">
+            {{ $news->links() }}
+        </div>
     </div>
 
 

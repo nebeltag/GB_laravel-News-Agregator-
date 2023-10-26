@@ -22,8 +22,8 @@ class CreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'resource_title' => ['required', 'string', 'min:3', 'max:150'],
-            'resource_url' => ['required', 'url', 'max:200'],
+            'resource_title' => ['required', 'string', 'unique:resources', 'min:3', 'max:150'],
+            'resource_url' => ['required', 'url', 'unique:resources','max:200'],
         ];
     }
 

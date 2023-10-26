@@ -12,6 +12,7 @@ use App\Http\Requests\Admin\News\CreateRequest;
 use App\Http\Requests\Admin\News\EditRequest;
 use App\Models\EloquentModels\Category;
 use App\Models\EloquentModels\News;
+use App\Services\Interfaces\StoreImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,17 +24,21 @@ use Illuminate\View\View;
 class NewsController extends Controller
 {
 
-    public function storeImage(Request $request)
+    public function storeImageForDescription(Request $request, StoreImage $storeImageService)
     {
-        if ($request->hasFile('upload')) {
-            $originName = $request->file('upload')->getClientOriginalName();
+        $requestField = 'upload';
+        if ($request->hasFile($requestField)) {
+            /*$originName = $request->file($requestField)->getClientOriginalName();
             $fileName = pathinfo($originName, PATHINFO_FILENAME);
-            $extension = $request->file('upload')->getClientOriginalExtension();
-            $fileName = $fileName . '_' . time() . '.' . $extension;
+            $extension = $request->file($requestField)->getClientOriginalExtension();
+            $fileName = $fileName . '_' . time() . '.' . $extension;*/
 
-            $request->file('upload')->move(public_path('media'), $fileName);
+            $fileName = $storeImageService->getUploadedFileName($request, $requestField);
+
+            $request->file($requestField)->move(public_path('media'), $fileName);
 
             $url = asset('media/' . $fileName);
+
             return response()->json(['fileName' => $fileName, 'uploaded'=> 1, 'url' => $url]);
         }
 
@@ -52,7 +57,7 @@ class NewsController extends Controller
             ->select('news.*', 'categories.name as category_name')
             ->orderByDesc('id')
             ->paginate(5);*/
-//        dump($news);
+        //dd($request);
         /*$newsList = DB::table('news')
             ->join('categories', 'categories.id','=', 'news.category_id')
             ->select('news.*', 'categories.name as category_name')
@@ -60,13 +65,13 @@ class NewsController extends Controller
             ->get();*/
 
 
-        return \view ('blade.admin.news.index', [
+        return view ('blade.admin.news.index', [
             'news' => News::query()
                 ->status()
 //                ->where('status', $request->query('f', 'draft')) - если без SCOPE, status() - закомментировать
                 ->with('category')
                 ->orderByDesc('id')
-                ->paginate(5)
+                ->paginate(7)
                 ->withQueryString()  //  or ->appends($request->query()
         ]);
     }
@@ -79,13 +84,13 @@ class NewsController extends Controller
         $categoriesList = Category::all();
 //        $categoriesList = DB::table('categories')->get();
 
-        return \view ('blade.admin.news.create', ['categories' => $categoriesList]);
+        return view ('blade.admin.news.create', ['categories' => $categoriesList]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateRequest $request): RedirectResponse
+    public function store(CreateRequest $request, StoreImage $storeImageService): RedirectResponse
     {
        /* $categoryName = request('category');
         $categoryId = DB::table('categories')
@@ -107,7 +112,7 @@ class NewsController extends Controller
 
 //               $postId = DB::table('news')->insertGetId($post);
 
-        request()->flash();
+        //request()->flash();
 
         $data = $request->only([
             'category_id',
@@ -119,14 +124,15 @@ class NewsController extends Controller
             'image'
             ]);
 
-        $url = '';
+       /* $url = '';
         if($request->hasFile('image')) {
             $path = Storage::putFile('public/img/photo', $request->file('image'));
             $url = Storage::url($path);
-        }
+        }*/
 
         $news = new News($data);
-        $news->image = $url;
+        $requestField = 'image';
+        $news->image = $storeImageService->storeImage($request, $news, $requestField);;
         $news->save();
 
         if($news->save()) {
@@ -153,16 +159,18 @@ class NewsController extends Controller
     {
         $categories = Category::all();
         return view ('blade.admin.news.edit',
-        ['categories' => $categories,
-        'news' => $news
-        ]);
+            [
+                'categories' => $categories,
+                'news' => $news
+            ]
+        );
 
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(EditRequest $request, News $news)
+    public function update(EditRequest $request, News $news, StoreImage $storeImageService)
     {
         //$request->flash();
         //return redirect()->route('admin.news.edit', ['news' => $news]);s
@@ -178,7 +186,7 @@ class NewsController extends Controller
 
         //$url = $news->image;
 
-        if($request->hasFile('image')) {
+        /*if($request->hasFile('image')) {
 
             $request->validate([
                 'image' => ['sometimes', 'image', 'mimes:jpeg, bmp, png|max:1500']
@@ -191,13 +199,13 @@ class NewsController extends Controller
             $url = Storage::url($path);
             $data['image'] = $url;
 
-            /*Storage::delete($news->image);
+            Storage::delete($news->image);
 
             $path = $request->file('image')->store('public/img/photo');
-            $data['image'] = $path;*/
-        }
-
-       //$news->image = $url;
+            $data['image'] = $path;
+        }*/
+        $requestField = 'image';
+        $data['image'] = $storeImageService->storeImage($request, $news, $requestField);
         $news -> fill($data);
 
         if($news->save()) {

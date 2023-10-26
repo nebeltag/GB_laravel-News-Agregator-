@@ -45,7 +45,7 @@ class NewsController extends Controller
         //dump($news);
 
 
-        return \view('blade.news.show')->with(['news' => $news]);
+        return view('blade.news.show')->with(['news' => $news]);
 
     }
 

@@ -127,5 +127,5 @@ Auth::routes();
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::post('image-upload', [AdminNewsController::class, 'storeImage'])->name('image.upload');
+Route::post('image-upload', [AdminNewsController::class, 'storeImageForDescription'])->name('image.upload');
 

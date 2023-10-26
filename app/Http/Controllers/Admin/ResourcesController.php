@@ -79,7 +79,7 @@ class ResourcesController extends Controller
      */
     public function update(EditRequest $request, Resource $resource)
     {
-        $request->flash();
+        //$request->flash();
         $data = $request->only(['resource_title', 'resource_url']);
 
         $resource -> fill($data);
